@@ -65,7 +65,7 @@ const Index = () => {
         }
       }
 
-      toast.success('Anime story creation complete!', { id: 'image-generation' });
+      toast.success('Anime story creation complete! You can now create a video.', { id: 'image-generation' });
     } catch (error) {
       console.error('Error generating story:', error);
       toast.error('Failed to generate story. Please try again.', { id: 'story-generation' });

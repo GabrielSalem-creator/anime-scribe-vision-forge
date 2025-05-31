@@ -32,7 +32,7 @@ export class AIService {
   }
 
   async generateStoryScript(request: StoryGenerationRequest): Promise<GeneratedScene[]> {
-    const scenesCount = Math.ceil(request.duration / 3); // One scene every 3 seconds
+    const scenesCount = Math.ceil(request.duration / 2); // One scene every 2 seconds
     
     const prompt = this.buildStoryPrompt(request, scenesCount);
     
@@ -81,7 +81,7 @@ export class AIService {
 Create a detailed anime script breakdown for the following story:
 
 Story: "${request.story}"
-Duration: ${request.duration} seconds (${scenesCount} scenes, 3 seconds each)
+Duration: ${request.duration} seconds (${scenesCount} scenes, 2 seconds each)
 Genre: ${request.genre}
 Art Style: ${request.artStyle}
 Setting: ${request.setting}
@@ -91,7 +91,7 @@ Pacing: ${request.pacing}
 Special Effects: ${request.specialEffects}
 Camera Style: ${request.cameraStyle}
 
-Please provide EXACTLY ${scenesCount} scenes in JSON format. Each scene should be 3 seconds long and include:
+Please provide EXACTLY ${scenesCount} scenes in JSON format. Each scene should be 2 seconds long and include:
 
 1. Timestamp (in seconds)
 2. Scene number
@@ -138,7 +138,7 @@ Make sure the story flows naturally across all ${scenesCount} scenes and capture
       
       // Validate and ensure proper timestamps
       return scenes.map((scene: any, index: number) => ({
-        timestamp: index * 3,
+        timestamp: index * 2,
         scene: index + 1,
         description: scene.description || `Scene ${index + 1} description`,
         dialogue: scene.dialogue || undefined,
@@ -150,9 +150,9 @@ Make sure the story flows naturally across all ${scenesCount} scenes and capture
       console.error('Error parsing story response:', error);
       
       // Fallback: create basic scenes
-      const scenesCount = Math.ceil(duration / 3);
+      const scenesCount = Math.ceil(duration / 2);
       return Array.from({ length: scenesCount }, (_, index) => ({
-        timestamp: index * 3,
+        timestamp: index * 2,
         scene: index + 1,
         description: `Scene ${index + 1} from the story`,
         characters: ['Main Character'],

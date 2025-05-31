@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Clock, Users, Camera, Palette } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Clock, Users, Camera, Palette, Download, Video } from 'lucide-react';
+import { VideoService } from '@/services/videoService';
+import { toast } from 'sonner';
 
 export interface StoryScene {
   timestamp: number;
@@ -24,10 +26,47 @@ interface StoryOutputProps {
 }
 
 const StoryOutput: React.FC<StoryOutputProps> = ({ scenes, totalDuration }) => {
+  const [isCreatingVideo, setIsCreatingVideo] = useState(false);
+  const [videoService] = useState(new VideoService());
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const allImagesGenerated = scenes.length > 0 && scenes.every(scene => scene.imageUrl && !scene.isGenerating);
+
+  const handleCreateVideo = async () => {
+    if (!allImagesGenerated) {
+      toast.error('Please wait for all images to be generated first');
+      return;
+    }
+
+    setIsCreatingVideo(true);
+    toast.loading('Creating animated video...', { id: 'video-creation' });
+
+    try {
+      const scenesWithImages = scenes
+        .filter(scene => scene.imageUrl)
+        .map(scene => ({
+          imageUrl: scene.imageUrl!,
+          timestamp: scene.timestamp
+        }));
+
+      const videoUrl = await videoService.createVideoFromImages(scenesWithImages);
+      
+      toast.success('Video created successfully!', { id: 'video-creation' });
+      
+      // Auto-download the video
+      videoService.downloadVideo(videoUrl, `anime-story-${Date.now()}.webm`);
+      
+    } catch (error) {
+      console.error('Error creating video:', error);
+      toast.error('Failed to create video. Please try again.', { id: 'video-creation' });
+    } finally {
+      setIsCreatingVideo(false);
+    }
   };
 
   if (scenes.length === 0) {
@@ -41,15 +80,37 @@ const StoryOutput: React.FC<StoryOutputProps> = ({ scenes, totalDuration }) => {
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
             Generated Anime Story
           </CardTitle>
-          <div className="flex items-center space-x-4 text-slate-300">
-            <div className="flex items-center space-x-1">
-              <Clock className="h-4 w-4" />
-              <span>{formatTime(totalDuration)} total</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 text-slate-300">
+              <div className="flex items-center space-x-1">
+                <Clock className="h-4 w-4" />
+                <span>{formatTime(totalDuration)} total</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Camera className="h-4 w-4" />
+                <span>{scenes.length} scenes</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-1">
-              <Camera className="h-4 w-4" />
-              <span>{scenes.length} scenes</span>
-            </div>
+            {allImagesGenerated && (
+              <Button
+                onClick={handleCreateVideo}
+                disabled={isCreatingVideo}
+                className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+              >
+                {isCreatingVideo ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Creating Video...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Video className="h-4 w-4" />
+                    <Download className="h-4 w-4" />
+                    <span>Create & Download Video</span>
+                  </div>
+                )}
+              </Button>
+            )}
           </div>
         </CardHeader>
       </Card>
