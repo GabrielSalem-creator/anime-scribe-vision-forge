@@ -19,9 +19,9 @@ const Index = () => {
     setTotalDuration(formData.duration);
 
     try {
-      toast.loading('Generating story script...', { id: 'story-generation' });
+      toast.loading('Generating detailed story script...', { id: 'story-generation' });
 
-      // Generate the story script
+      // Generate the story script (1 scene per second)
       const generatedScenes = await aiService.generateStoryScript(formData);
       
       // Convert to StoryScene format and set initial state
@@ -31,14 +31,14 @@ const Index = () => {
       }));
 
       setScenes(initialScenes);
-      toast.success('Story script generated! Now creating images...', { id: 'story-generation' });
+      toast.success('Story script generated! Now creating detailed images...', { id: 'story-generation' });
 
       // Generate images for each scene
       const updatedScenes = [...initialScenes];
       
       for (let i = 0; i < generatedScenes.length; i++) {
         try {
-          toast.loading(`Generating image ${i + 1} of ${generatedScenes.length}...`, { id: 'image-generation' });
+          toast.loading(`Generating detailed image ${i + 1} of ${generatedScenes.length}...`, { id: 'image-generation' });
           
           const imageUrl = await imageService.generateImage(generatedScenes[i].visualPrompt);
           
@@ -65,7 +65,7 @@ const Index = () => {
         }
       }
 
-      toast.success('Anime story creation complete! You can now create a video.', { id: 'image-generation' });
+      toast.success('Anime story creation complete! You can now create a video with custom timing.', { id: 'image-generation' });
     } catch (error) {
       console.error('Error generating story:', error);
       toast.error('Failed to generate story. Please try again.', { id: 'story-generation' });

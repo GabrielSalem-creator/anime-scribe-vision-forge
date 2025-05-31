@@ -81,7 +81,7 @@ export class AIService {
 Create a detailed anime script breakdown for the following story:
 
 Story: "${request.story}"
-Duration: ${request.duration} seconds (${scenesCount} scenes, 2 seconds each)
+Duration: ${request.duration} seconds (${scenesCount} scenes, 1 second each)
 Genre: ${request.genre}
 Art Style: ${request.artStyle}
 Setting: ${request.setting}
@@ -91,7 +91,7 @@ Pacing: ${request.pacing}
 Special Effects: ${request.specialEffects}
 Camera Style: ${request.cameraStyle}
 
-Please provide EXACTLY ${scenesCount} scenes in JSON format. Each scene should be 2 seconds long and include:
+Please provide EXACTLY ${scenesCount} scenes in JSON format. Each scene should be 1 second long and include:
 
 1. Timestamp (in seconds)
 2. Scene number
@@ -99,15 +99,20 @@ Please provide EXACTLY ${scenesCount} scenes in JSON format. Each scene should b
 4. Dialogue (if any characters are speaking)
 5. Characters present in the scene
 6. Setting description
-7. Extremely detailed visual prompt for image generation (include character appearances, clothing, expressions, lighting, camera angles, background details, colors, atmosphere)
+7. EXTREMELY detailed visual prompt for image generation
 
-Format your response as a JSON array of scenes. Make the visual prompts very detailed and specific for anime art generation, including:
-- Character physical descriptions (hair color, eye color, clothing, expressions)
-- Lighting conditions (dramatic lighting, soft glow, etc.)
-- Camera angles and composition
-- Background and environment details
-- Art style specifications
-- Color palette and mood
+For the visual prompts, be EXTREMELY SPECIFIC and include ALL of these details:
+- EXACT character descriptions (age, gender, height, build, facial features, hair color/style/length, eye color, skin tone)
+- DETAILED clothing descriptions (style, colors, materials, accessories, footwear)
+- PRECISE facial expressions and body language (what emotion, how they're standing/sitting, hand positions, eye direction)
+- EXACT actions being performed (step-by-step what the character is doing)
+- DETAILED environment description (indoor/outdoor, time of day, weather, lighting conditions)
+- SPECIFIC background elements (furniture, objects, landscape features, architecture style)
+- CAMERA details (close-up/wide shot/medium shot, angle - high/low/eye level, perspective)
+- LIGHTING specifics (natural/artificial, direction, intensity, shadows, highlights)
+- COLOR palette (dominant colors, mood colors, contrast levels)
+- ART STYLE details (anime style specifics, shading technique, line art style)
+- ATMOSPHERE description (mood, feeling, energy level)
 
 Example format:
 [
@@ -118,11 +123,11 @@ Example format:
     "dialogue": "Character dialogue...",
     "characters": ["Character 1", "Character 2"],
     "setting": "Detailed setting description...",
-    "visualPrompt": "Extremely detailed visual description for image generation..."
+    "visualPrompt": "Anime style, high quality art. [CHARACTER]: 17-year-old female protagonist, 5'4\", athletic build, long flowing black hair with blue highlights tied in high ponytail, bright emerald green eyes, fair skin, wearing navy blue school uniform with white collar, red tie, knee-length pleated skirt, white knee-high socks, black loafers. [EXPRESSION]: Determined smile, confident posture, standing with hands on hips, looking directly at camera. [ACTION]: Standing triumphantly on school rooftop after completing training. [SETTING]: Japanese high school rooftop at sunset, concrete floor with safety railings, city skyline in background, orange and pink sky with scattered clouds. [CAMERA]: Medium shot from slightly low angle to emphasize heroic pose. [LIGHTING]: Warm golden hour lighting from behind creating rim light effect on hair, soft shadows on face. [COLORS]: Warm orange and pink sunset tones contrasting with cool blue uniform colors. [STYLE]: Clean anime art style with detailed shading, sharp line art, vibrant colors, Studio Ghibli influence."
   }
 ]
 
-Make sure the story flows naturally across all ${scenesCount} scenes and captures the essence of the original story.
+Make sure each visual prompt follows this detailed format and the story flows naturally across all ${scenesCount} scenes.
 `;
   }
 
@@ -136,9 +141,9 @@ Make sure the story flows naturally across all ${scenesCount} scenes and capture
 
       const scenes = JSON.parse(jsonMatch[0]);
       
-      // Validate and ensure proper timestamps
+      // Validate and ensure proper timestamps (1 second per scene)
       return scenes.map((scene: any, index: number) => ({
-        timestamp: index * 2,
+        timestamp: index,
         scene: index + 1,
         description: scene.description || `Scene ${index + 1} description`,
         dialogue: scene.dialogue || undefined,
@@ -150,15 +155,14 @@ Make sure the story flows naturally across all ${scenesCount} scenes and capture
       console.error('Error parsing story response:', error);
       
       // Fallback: create basic scenes
-      const scenesCount = Math.ceil(duration / 2);
+      const scenesCount = duration;
       return Array.from({ length: scenesCount }, (_, index) => ({
-        timestamp: index * 2,
+        timestamp: index,
         scene: index + 1,
         description: `Scene ${index + 1} from the story`,
         characters: ['Main Character'],
         setting: 'Story setting',
-        visualPrompt: `Anime style scene ${index + 1} based on the story`
+        visualPrompt: `Detailed anime style scene ${index + 1} based on the story with precise character and environment descriptions`
       }));
     }
   }
-}

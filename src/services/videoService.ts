@@ -1,6 +1,6 @@
 
 export class VideoService {
-  async createVideoFromImages(scenes: Array<{ imageUrl: string; timestamp: number }>): Promise<string> {
+  async createVideoFromImages(scenes: Array<{ imageUrl: string; timestamp: number; duration?: number }>, sceneDuration: number = 1000): Promise<string> {
     try {
       // Create a canvas element
       const canvas = document.createElement('canvas');
@@ -43,7 +43,7 @@ export class VideoService {
         mediaRecorder.start();
 
         // Animate through all scenes
-        this.animateScenes(ctx, canvas, scenes).then(() => {
+        this.animateScenes(ctx, canvas, scenes, sceneDuration).then(() => {
           mediaRecorder.stop();
         }).catch(reject);
       });
@@ -56,14 +56,15 @@ export class VideoService {
   private async animateScenes(
     ctx: CanvasRenderingContext2D, 
     canvas: HTMLCanvasElement, 
-    scenes: Array<{ imageUrl: string; timestamp: number }>
+    scenes: Array<{ imageUrl: string; timestamp: number; duration?: number }>,
+    defaultSceneDuration: number
   ): Promise<void> {
     const frameDuration = 1000 / 30; // 30 FPS
-    const sceneDuration = 2000; // 2 seconds per scene
-    const framesPerScene = sceneDuration / frameDuration;
 
     for (let i = 0; i < scenes.length; i++) {
       const scene = scenes[i];
+      const sceneDuration = scene.duration || defaultSceneDuration;
+      const framesPerScene = sceneDuration / frameDuration;
       
       try {
         // Load the image
@@ -74,7 +75,7 @@ export class VideoService {
           img.src = scene.imageUrl;
         });
 
-        // Animate this scene for 2 seconds
+        // Animate this scene for the specified duration
         for (let frame = 0; frame < framesPerScene; frame++) {
           // Clear canvas
           ctx.fillStyle = '#000000';
@@ -124,7 +125,7 @@ export class VideoService {
         ctx.font = '30px Arial';
         ctx.fillText(`Error loading scene ${i + 1}`, 50, canvas.height / 2);
         
-        await new Promise(resolve => setTimeout(resolve, sceneDuration));
+        await new Promise(resolve => setTimeout(resolve, defaultSceneDuration));
       }
     }
   }
