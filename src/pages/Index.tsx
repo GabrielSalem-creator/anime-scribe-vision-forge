@@ -3,45 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import StoryForm, { type StoryFormData } from '@/components/StoryForm';
 import StoryOutput, { type StoryScene } from '@/components/StoryOutput';
-import ApiKeyForm from '@/components/ApiKeyForm';
 import { AIService } from '@/services/aiService';
 import { ImageService } from '@/services/imageService';
 
 const Index = () => {
-  const [aiService, setAiService] = useState<AIService | null>(null);
-  const [imageService, setImageService] = useState<ImageService | null>(null);
+  const [aiService] = useState<AIService>(new AIService('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'));
+  const [imageService] = useState<ImageService>(new ImageService('2bc2e102900c03cec5304485acd19100c4984d821a3f1e5078f747578834f849'));
   const [scenes, setScenes] = useState<StoryScene[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [totalDuration, setTotalDuration] = useState(0);
 
-  // Check for stored API keys on component mount
-  useEffect(() => {
-    const storedAiKey = localStorage.getItem('anime_ai_api_key');
-    const storedImageKey = localStorage.getItem('anime_image_api_key');
-    
-    if (storedAiKey && storedImageKey) {
-      setAiService(new AIService(storedAiKey));
-      setImageService(new ImageService(storedImageKey));
-    }
-  }, []);
-
-  const handleApiKeysSubmit = (aiKey: string, imageKey: string) => {
-    // Store API keys in localStorage
-    localStorage.setItem('anime_ai_api_key', aiKey);
-    localStorage.setItem('anime_image_api_key', imageKey);
-    
-    setAiService(new AIService(aiKey));
-    setImageService(new ImageService(imageKey));
-    
-    toast.success('API keys configured successfully!');
-  };
-
   const handleGenerateStory = async (formData: StoryFormData) => {
-    if (!aiService || !imageService) {
-      toast.error('Please configure your API keys first');
-      return;
-    }
-
     setIsGenerating(true);
     setScenes([]);
     setTotalDuration(formData.duration);
@@ -101,11 +73,6 @@ const Index = () => {
       setIsGenerating(false);
     }
   };
-
-  // Show API key form if services are not configured
-  if (!aiService || !imageService) {
-    return <ApiKeyForm onApiKeysSubmit={handleApiKeysSubmit} />;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
