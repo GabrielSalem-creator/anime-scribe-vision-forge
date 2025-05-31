@@ -32,7 +32,7 @@ export class AIService {
   }
 
   async generateStoryScript(request: StoryGenerationRequest): Promise<GeneratedScene[]> {
-    const scenesCount = Math.ceil(request.duration / 2); // One scene every 2 seconds
+    const scenesCount = request.duration; // One scene per second
     
     const prompt = this.buildStoryPrompt(request, scenesCount);
     
@@ -166,3 +166,4 @@ Make sure each visual prompt follows this detailed format and the story flows na
       }));
     }
   }
+}
