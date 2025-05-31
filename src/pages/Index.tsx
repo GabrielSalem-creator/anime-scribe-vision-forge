@@ -8,7 +8,16 @@ import { ImageService } from '@/services/imageService';
 
 const Index = () => {
   const [aiService] = useState<AIService>(new AIService('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'));
-  const [imageService] = useState<ImageService>(new ImageService('2bc2e102900c03cec5304485acd19100c4984d821a3f1e5078f747578834f849'));
+  
+  // Multiple API keys for faster image generation
+  const imageApiKeys = [
+    'f681daf078ee9479dde6b6b2adf6de31daac782a8d8d218938bdf1c1e977f46a',
+    'a8bae46ba72b6b68b1ea65102e86f24ca9abbd65f72e958a3cadaccb2b6df2a7',
+    '6ca8a3346c5e32f8504e4d898d863392ce50d59ee7f7392f1b174d2d4bd6bc9f',
+    '75afebc8c99419cc03856f276f428a357211260305461244be4c612b469d4811'
+  ];
+  
+  const [imageService] = useState<ImageService>(new ImageService(imageApiKeys));
   const [scenes, setScenes] = useState<StoryScene[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [totalDuration, setTotalDuration] = useState(0);
@@ -31,41 +40,40 @@ const Index = () => {
       }));
 
       setScenes(initialScenes);
-      toast.success('Story script generated! Now creating detailed images...', { id: 'story-generation' });
+      toast.success('Story script generated! Now creating detailed images using parallel processing...', { id: 'story-generation' });
 
-      // Generate images for each scene
-      const updatedScenes = [...initialScenes];
+      // Generate all images in parallel using multiple API keys
+      const prompts = generatedScenes.map(scene => scene.visualPrompt);
       
-      for (let i = 0; i < generatedScenes.length; i++) {
-        try {
-          toast.loading(`Generating detailed image ${i + 1} of ${generatedScenes.length}...`, { id: 'image-generation' });
-          
-          const imageUrl = await imageService.generateImage(generatedScenes[i].visualPrompt);
-          
-          updatedScenes[i] = {
-            ...updatedScenes[i],
-            imageUrl,
-            isGenerating: false
-          };
-          
-          setScenes([...updatedScenes]);
-          
-          // Small delay between image generations to avoid rate limiting
-          if (i < generatedScenes.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        } catch (error) {
-          console.error(`Error generating image for scene ${i + 1}:`, error);
-          updatedScenes[i] = {
-            ...updatedScenes[i],
-            isGenerating: false
-          };
-          setScenes([...updatedScenes]);
-          toast.error(`Failed to generate image for scene ${i + 1}`);
-        }
+      toast.loading('Generating all images in parallel for faster processing...', { id: 'image-generation' });
+      
+      try {
+        const imageResults = await imageService.generateImagesParallel(prompts);
+        
+        // Update scenes with generated images
+        const updatedScenes = generatedScenes.map((scene, index) => ({
+          ...scene,
+          imageUrl: imageResults[index] || undefined,
+          isGenerating: false
+        }));
+        
+        setScenes(updatedScenes);
+        
+        const successCount = imageResults.filter(result => result !== null).length;
+        toast.success(`Anime story creation complete! Generated ${successCount}/${generatedScenes.length} images successfully.`, { id: 'image-generation' });
+        
+      } catch (error) {
+        console.error('Error in parallel image generation:', error);
+        toast.error('Some images failed to generate. Please try again.', { id: 'image-generation' });
+        
+        // Mark all scenes as not generating
+        const updatedScenes = generatedScenes.map(scene => ({
+          ...scene,
+          isGenerating: false
+        }));
+        setScenes(updatedScenes);
       }
 
-      toast.success('Anime story creation complete! You can now create a video with custom timing.', { id: 'image-generation' });
     } catch (error) {
       console.error('Error generating story:', error);
       toast.error('Failed to generate story. Please try again.', { id: 'story-generation' });

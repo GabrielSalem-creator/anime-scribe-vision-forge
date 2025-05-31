@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Clock, Users, Camera, Palette, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clock, Users, Camera, Palette, ChevronDown, ChevronUp, Minimize, Maximize } from 'lucide-react';
 import { StoryScene } from './StoryOutput';
 
 interface SceneCardProps {
@@ -14,6 +14,7 @@ interface SceneCardProps {
 
 const SceneCard: React.FC<SceneCardProps> = ({ scene, index }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isImageMinimized, setIsImageMinimized] = useState(false);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -105,22 +106,44 @@ const SceneCard: React.FC<SceneCardProps> = ({ scene, index }) => {
               </div>
             )}
 
-            <div className="aspect-video bg-slate-900/50 rounded-lg border-2 border-dashed border-purple-500/30 flex items-center justify-center">
-              {scene.isGenerating ? (
-                <div className="text-center space-y-2">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto"></div>
-                  <p className="text-slate-400 text-sm">Generating image...</p>
+            <div className="relative">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-semibold text-purple-300 text-sm">Generated Image</h4>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsImageMinimized(!isImageMinimized)}
+                  className="text-purple-300 hover:text-purple-200 h-6 w-6 p-0"
+                >
+                  {isImageMinimized ? <Maximize className="h-3 w-3" /> : <Minimize className="h-3 w-3" />}
+                </Button>
+              </div>
+              
+              {!isImageMinimized && (
+                <div className="aspect-video bg-slate-900/50 rounded-lg border-2 border-dashed border-purple-500/30 flex items-center justify-center">
+                  {scene.isGenerating ? (
+                    <div className="text-center space-y-2">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto"></div>
+                      <p className="text-slate-400 text-sm">Generating image...</p>
+                    </div>
+                  ) : scene.imageUrl ? (
+                    <img
+                      src={scene.imageUrl}
+                      alt={`Scene ${scene.scene}`}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="text-center space-y-2">
+                      <Palette className="h-8 w-8 text-slate-600 mx-auto" />
+                      <p className="text-slate-500 text-sm">Image failed to generate</p>
+                    </div>
+                  )}
                 </div>
-              ) : scene.imageUrl ? (
-                <img
-                  src={scene.imageUrl}
-                  alt={`Scene ${scene.scene}`}
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              ) : (
-                <div className="text-center space-y-2">
-                  <Palette className="h-8 w-8 text-slate-600 mx-auto" />
-                  <p className="text-slate-500 text-sm">Image pending</p>
+              )}
+              
+              {isImageMinimized && (
+                <div className="h-12 bg-slate-900/50 rounded-lg border border-purple-500/30 flex items-center justify-center">
+                  <p className="text-slate-400 text-sm">Image minimized - click to expand</p>
                 </div>
               )}
             </div>
