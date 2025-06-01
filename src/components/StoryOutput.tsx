@@ -28,7 +28,8 @@ interface StoryOutputProps {
 
 const StoryOutput: React.FC<StoryOutputProps> = ({ scenes, totalDuration }) => {
   const [isCreatingVideo, setIsCreatingVideo] = useState(false);
-  const [playbackDuration, setPlaybackDuration] = useState('10');
+  const [totalFrames, setTotalFrames] = useState('30');
+  const [fps, setFps] = useState('30');
   const [videoService] = useState(new VideoService());
 
   const formatTime = (seconds: number) => {
@@ -38,7 +39,6 @@ const StoryOutput: React.FC<StoryOutputProps> = ({ scenes, totalDuration }) => {
   };
 
   const allImagesGenerated = scenes.length > 0 && scenes.every(scene => scene.imageUrl && !scene.isGenerating);
-  const totalFrames = scenes.length;
 
   const handleCreateVideo = async () => {
     if (!allImagesGenerated) {
@@ -50,7 +50,9 @@ const StoryOutput: React.FC<StoryOutputProps> = ({ scenes, totalDuration }) => {
     toast.loading('Creating animated video...', { id: 'video-creation' });
 
     try {
-      const duration = parseFloat(playbackDuration);
+      const frames = parseInt(totalFrames);
+      const frameRate = parseInt(fps);
+      
       const scenesWithImages = scenes
         .filter(scene => scene.imageUrl)
         .map(scene => ({
@@ -58,7 +60,7 @@ const StoryOutput: React.FC<StoryOutputProps> = ({ scenes, totalDuration }) => {
           timestamp: scene.timestamp
         }));
 
-      const videoUrl = await videoService.createVideoFromImages(scenesWithImages, totalFrames, duration);
+      const videoUrl = await videoService.createVideoFromImages(scenesWithImages, frames, frameRate);
       
       toast.success('Video created successfully!', { id: 'video-creation' });
       
@@ -77,6 +79,8 @@ const StoryOutput: React.FC<StoryOutputProps> = ({ scenes, totalDuration }) => {
     return null;
   }
 
+  const calculatedDuration = parseInt(totalFrames) / parseInt(fps);
+
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
       <Card className="bg-gradient-to-br from-slate-900 to-purple-900 border-purple-500/20">
@@ -88,30 +92,48 @@ const StoryOutput: React.FC<StoryOutputProps> = ({ scenes, totalDuration }) => {
             <div className="flex items-center space-x-4 text-slate-300">
               <div className="flex items-center space-x-1">
                 <Camera className="h-4 w-4" />
-                <span>{totalFrames} frames</span>
+                <span>{scenes.length} scenes</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Clock className="h-4 w-4" />
-                <span>{scenes.length} scenes</span>
+                <span>{calculatedDuration.toFixed(1)}s video</span>
               </div>
             </div>
             
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-slate-300">Video duration:</span>
-                <Select value={playbackDuration} onValueChange={setPlaybackDuration}>
-                  <SelectTrigger className="w-24 bg-slate-800 border-purple-500/30">
+                <span className="text-sm text-slate-300">Total frames:</span>
+                <Select value={totalFrames} onValueChange={setTotalFrames}>
+                  <SelectTrigger className="w-20 bg-slate-800 border-purple-500/30">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-purple-500/30">
-                    <SelectItem value="5">5s</SelectItem>
-                    <SelectItem value="8">8s</SelectItem>
-                    <SelectItem value="10">10s</SelectItem>
-                    <SelectItem value="15">15s</SelectItem>
-                    <SelectItem value="20">20s</SelectItem>
-                    <SelectItem value="30">30s</SelectItem>
-                    <SelectItem value="45">45s</SelectItem>
-                    <SelectItem value="60">60s</SelectItem>
+                    <SelectItem value="15">15</SelectItem>
+                    <SelectItem value="30">30</SelectItem>
+                    <SelectItem value="45">45</SelectItem>
+                    <SelectItem value="60">60</SelectItem>
+                    <SelectItem value="90">90</SelectItem>
+                    <SelectItem value="120">120</SelectItem>
+                    <SelectItem value="150">150</SelectItem>
+                    <SelectItem value="180">180</SelectItem>
+                    <SelectItem value="240">240</SelectItem>
+                    <SelectItem value="300">300</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-slate-300">FPS:</span>
+                <Select value={fps} onValueChange={setFps}>
+                  <SelectTrigger className="w-16 bg-slate-800 border-purple-500/30">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-purple-500/30">
+                    <SelectItem value="15">15</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="24">24</SelectItem>
+                    <SelectItem value="30">30</SelectItem>
+                    <SelectItem value="60">60</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
