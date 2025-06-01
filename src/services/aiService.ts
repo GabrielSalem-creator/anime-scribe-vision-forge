@@ -1,4 +1,3 @@
-
 export interface StoryGenerationRequest {
   story: string;
   duration: number;
@@ -50,15 +49,15 @@ export class AIService {
           messages: [
             {
               role: "system",
-              content: "You are a master anime storyteller and visual director with expertise in creating compelling, coherent narratives. You specialize in breaking down stories into perfectly timed visual sequences that flow naturally and maintain audience engagement. Your stories are always clear, emotionally resonant, and visually stunning."
+              content: "You are a master anime storyteller and visual director specializing in creating compelling, coherent narratives with perfect pacing and emotional depth. Your expertise lies in breaking down complex stories into visually stunning sequences that flow seamlessly and maintain audience engagement throughout. You excel at character development, world-building, and creating emotionally resonant moments that stick with viewers."
             },
             {
               role: "user",
               content: prompt
             }
           ],
-          temperature: 0.7,
-          max_tokens: 6000
+          temperature: 0.8,
+          max_tokens: 8000
         })
       });
 
@@ -69,7 +68,7 @@ export class AIService {
       const data = await response.json();
       const content = data.choices[0].message.content;
       
-      return this.parseStoryResponse(content, request.duration);
+      return this.parseStoryResponse(content, request);
     } catch (error) {
       console.error('Error generating story script:', error);
       throw new Error('Failed to generate story script. Please try again.');
@@ -78,9 +77,9 @@ export class AIService {
 
   private buildAdvancedStoryPrompt(request: StoryGenerationRequest, scenesCount: number): string {
     return `
-ANIME STORY CREATION MASTERCLASS
+MASTER ANIME STORYTELLING FRAMEWORK
 
-You are creating a ${scenesCount}-second anime sequence based on this story concept:
+You are creating a ${scenesCount}-frame anime sequence based on this story concept:
 "${request.story}"
 
 STORY SPECIFICATIONS:
@@ -93,109 +92,125 @@ STORY SPECIFICATIONS:
 - Special Effects: ${request.specialEffects}
 - Camera Style: ${request.cameraStyle}
 
-CRITICAL REQUIREMENTS FOR STORY COHERENCE:
+CRITICAL STORYTELLING PRINCIPLES:
 
-1. NARRATIVE STRUCTURE:
-   - Create a clear beginning, middle, and end
-   - Each scene must logically connect to the next
-   - Maintain consistent character behavior and motivation
-   - Build tension/emotion progressively
-   - Ensure the story has a satisfying resolution
+1. NARRATIVE COHERENCE & FLOW:
+   - Create a clear three-act structure with distinct beginning, middle, and end
+   - Each scene must logically connect to the next with smooth transitions
+   - Build tension progressively towards a satisfying climax
+   - Ensure character motivations are clear and consistent
+   - Every scene should advance the plot or develop character
+   - Create emotional beats that resonate with the audience
 
-2. CHARACTER CONSISTENCY:
-   - Keep character descriptions identical throughout all scenes
-   - Maintain personality traits across scenes
-   - Show clear character emotions and reactions
-   - Give characters specific goals and obstacles
+2. CHARACTER DEVELOPMENT:
+   - Maintain consistent character appearance and personality throughout
+   - Show clear character growth or change across the sequence
+   - Give characters specific, relatable goals and meaningful obstacles
+   - Express emotions through facial expressions, body language, and dialogue
+   - Create distinct character voices and speech patterns
 
-3. VISUAL CONTINUITY:
-   - Maintain consistent art style and lighting
-   - Keep settings logically connected
-   - Show smooth transitions between scenes
-   - Ensure props and costumes remain consistent
+3. VISUAL STORYTELLING MASTERY:
+   - Use varied shot compositions (close-ups for emotion, wide shots for scale)
+   - Implement dynamic camera movements that enhance the story
+   - Create visual metaphors and symbolism that reinforce themes
+   - Maintain consistent lighting and art direction throughout
+   - Use color psychology to enhance mood and emotion
 
-4. PACING AND FLOW:
-   - Vary shot types for visual interest (close-ups, wide shots, medium shots)
-   - Balance action scenes with emotional moments
-   - Use appropriate camera movements for the mood
-   - Create natural breathing room in dialogue
+4. PACING & RHYTHM:
+   - Balance fast-paced action with quiet character moments
+   - Create natural breathing room between intense scenes
+   - Use dialogue strategically - not every scene needs words
+   - Build anticipation before major story moments
+   - End with impact that leaves a lasting impression
 
-5. DIALOGUE QUALITY:
-   - Write natural, character-appropriate dialogue
-   - Keep dialogue concise and impactful
-   - Show character personality through speech patterns
-   - Advance the plot through conversations
+5. DIALOGUE EXCELLENCE:
+   - Write natural, character-appropriate dialogue that sounds authentic
+   - Keep lines concise but impactful
+   - Show personality through unique speech patterns
+   - Use subtext - characters don't always say what they mean
+   - Advance plot through meaningful conversations
 
-SCENE BREAKDOWN INSTRUCTIONS:
+SCENE CREATION FRAMEWORK:
 
-Create EXACTLY ${scenesCount} scenes in this JSON format. Each scene represents 1 second of video:
+Create EXACTLY ${scenesCount} scenes in this JSON format. Each scene represents one frame of animation:
 
-EXAMPLE STRUCTURE:
+REQUIRED JSON STRUCTURE:
 [
   {
     "timestamp": 0,
     "scene": 1,
-    "description": "Clear, specific description of what happens in this scene",
-    "dialogue": "Character Name: 'Exact dialogue here'" (only if someone speaks),
+    "description": "Detailed scene description focusing on story progression",
+    "dialogue": "Character Name: 'Impactful dialogue that advances plot'" (only when necessary),
     "characters": ["Character Name 1", "Character Name 2"],
-    "setting": "Specific location description",
-    "visualPrompt": "DETAILED visual prompt following the format below"
+    "setting": "Specific, atmospheric location description",
+    "visualPrompt": "ULTRA-DETAILED visual prompt following the format below"
   }
 ]
 
-VISUAL PROMPT FORMAT (BE EXTREMELY DETAILED):
+ULTRA-DETAILED VISUAL PROMPT REQUIREMENTS:
 
-For each scene, create a visual prompt that includes ALL these elements:
+Each visual prompt must include ALL these elements for maximum clarity:
 
-**CHARACTER DETAILS:**
-- Full character descriptions (age, gender, height, build, facial features)
-- Complete outfit descriptions (clothing, colors, accessories, footwear)
-- Specific facial expressions showing clear emotions
-- Exact body language and positioning
-- Hair style, color, and length
-- Eye color and expression
+**CHARACTER SPECIFICATIONS:**
+- Complete physical description (age, gender, height, build, distinctive features)
+- Detailed outfit description (clothing style, colors, textures, accessories)
+- Precise facial expression showing specific emotions
+- Exact body positioning and gestures
+- Hair style, length, color, and how it moves
+- Eye color, expression, and where they're looking
+- Any unique character traits or markings
 
 **ACTION & MOVEMENT:**
-- Precise description of what the character is doing
-- Body positioning and gestures
-- Eye direction and focus
-- Movement type (walking, running, standing, sitting, etc.)
+- Specific action being performed in this frame
+- Body language that conveys emotion and intent
+- Hand gestures and their meaning
+- Facial micro-expressions
+- Movement direction and energy level
 
-**ENVIRONMENT:**
-- Complete setting description (indoor/outdoor, time of day, weather)
-- Background elements (furniture, objects, landscape, architecture)
-- Lighting conditions (natural/artificial, direction, intensity, shadows)
-- Atmosphere and mood elements
+**ENVIRONMENT & ATMOSPHERE:**
+- Complete setting description (time of day, weather, season)
+- Background elements that enhance the story
+- Lighting conditions (source, intensity, shadows, atmosphere)
+- Architectural or natural elements
+- Objects that tell part of the story
 
-**CAMERA & COMPOSITION:**
-- Shot type (close-up, medium shot, wide shot, extreme close-up)
-- Camera angle (eye level, high angle, low angle, dutch angle)
-- Camera movement (static, pan, tilt, zoom, tracking)
-- Composition style (rule of thirds, centered, dynamic)
+**CINEMATIC COMPOSITION:**
+- Shot type (extreme close-up, close-up, medium, wide, establishing)
+- Camera angle (eye level, high, low, dutch, bird's eye, worm's eye)
+- Camera movement (static, pan, tilt, zoom, dolly, tracking)
+- Composition rules (rule of thirds, leading lines, framing)
+- Depth of field and focus points
 
 **ART STYLE & TECHNICAL:**
-- Specific anime art style (Studio Ghibli, modern anime, classic anime)
-- Color palette and mood
-- Shading and lighting style
-- Line art quality and style
-- Background detail level
+- Specific anime style (Studio Ghibli, Makoto Shinkai, classic 90s anime)
+- Color palette and mood enhancement
+- Lighting style (soft, dramatic, rim lighting, volumetric)
+- Line art quality and shading technique
+- Background detail level and artistic approach
+- Special effects if applicable
 
 EXAMPLE VISUAL PROMPT:
-"High-quality anime art, Studio Ghibli style. CHARACTER: 16-year-old female protagonist, 5'3\", slender build, large expressive violet eyes, shoulder-length auburn hair with side bangs, fair skin with light freckles, wearing white school uniform blouse with navy blue sailor collar, red ribbon tie, dark blue pleated skirt, white knee-high socks, brown loafers. EXPRESSION: Determined smile with slightly furrowed brow showing concentration, looking directly forward with confident posture. ACTION: Standing at school entrance gate, right hand gripping backpack strap, left hand holding acceptance letter, body slightly leaning forward in anticipation. SETTING: Japanese high school entrance with cherry blossom trees in full bloom, morning sunlight filtering through pink petals, traditional school building architecture in background, stone pathway leading to main entrance. CAMERA: Medium shot from slightly low angle to emphasize determination, centered composition. LIGHTING: Soft morning sunlight from upper left creating gentle shadows, warm golden rim lighting on hair. COLORS: Warm spring palette with soft pinks, whites, and blues, high contrast for emotional impact. STYLE: Clean anime line art with detailed shading, vibrant but natural colors, detailed background with depth of field effect."
+"High-quality anime art in Makoto Shinkai style with photorealistic lighting. CHARACTER: 17-year-old female protagonist, 5'4", athletic build, determined violet eyes with golden flecks, shoulder-length auburn hair with natural wave catching sunlight, fair skin with subtle freckles across nose, wearing cream-colored school blazer with gold buttons, navy blue pleated skirt, white blouse with loose collar, brown leather school bag slung over right shoulder. EXPRESSION: Confident smile with slight determination furrow in brow, eyes focused on distant horizon, chin lifted slightly showing resolve. ACTION: Standing at crossroads with arms crossed, weight shifted to left leg, hair gently flowing in evening breeze, casting long shadow across cobblestone path. SETTING: Japanese countryside crossroads at golden hour, cherry blossom petals drifting through warm evening light, traditional wooden signposts pointing in multiple directions, rolling hills in background with traditional houses, soft clouds in amber sky. CAMERA: Medium shot from slightly low angle to emphasize determination, positioned to show both character and the path choices ahead. LIGHTING: Warm golden hour lighting from upper right, creating rim lighting on hair and soft shadows, volumetric light rays through distant trees. COLORS: Warm golden and amber tones with soft pastels, high contrast between light and shadow for emotional impact. STYLE: Ultra-detailed anime art with realistic lighting effects, crisp line art, detailed background with atmospheric perspective, cinematic composition."
 
-STORYTELLING FLOW:
-- Scene 1-3: Establish setting, introduce main character(s), set up the situation
-- Scene 4-6: Build tension, introduce conflict or challenge
-- Scene 7-9: Develop the conflict, show character reactions and decisions
-- Scene 10-12: Climax or turning point of the story
-- Scene 13-15: Resolution, character growth, emotional payoff
-(Adjust based on your ${scenesCount} scenes)
+STORY STRUCTURE GUIDE:
+- Frames 1-${Math.ceil(scenesCount * 0.2)}: Hook and setup - establish world, character, and initial situation
+- Frames ${Math.ceil(scenesCount * 0.2) + 1}-${Math.ceil(scenesCount * 0.4)}: Rising action - introduce conflict and build tension
+- Frames ${Math.ceil(scenesCount * 0.4) + 1}-${Math.ceil(scenesCount * 0.6)}: Development - character faces challenges, plot thickens
+- Frames ${Math.ceil(scenesCount * 0.6) + 1}-${Math.ceil(scenesCount * 0.8)}: Climax - peak dramatic moment, major revelation or confrontation
+- Frames ${Math.ceil(scenesCount * 0.8) + 1}-${scenesCount}: Resolution - wrap up conflict, show character growth, satisfying conclusion
 
-Now create a compelling, coherent ${scenesCount}-scene anime sequence that tells a complete, satisfying story.
+FINAL REQUIREMENTS:
+- Every scene must contribute meaningfully to the overall narrative
+- Maintain visual and emotional continuity between scenes
+- Create a complete, satisfying story arc within the frame count
+- End with emotional impact that resonates with viewers
+- Ensure the story feels complete, not rushed or incomplete
+
+Now create a masterful ${scenesCount}-frame anime sequence that tells a compelling, emotionally resonant story.
 `;
   }
 
-  private parseStoryResponse(content: string, duration: number): GeneratedScene[] {
+  private parseStoryResponse(content: string, request: StoryGenerationRequest): GeneratedScene[] {
     try {
       // Try to extract JSON from the response
       const jsonMatch = content.match(/\[[\s\S]*\]/);
@@ -205,7 +220,7 @@ Now create a compelling, coherent ${scenesCount}-scene anime sequence that tells
 
       const scenes = JSON.parse(jsonMatch[0]);
       
-      // Validate and ensure proper timestamps (1 second per scene)
+      // Validate and ensure proper timestamps (1 frame per scene)
       return scenes.map((scene: any, index: number) => ({
         timestamp: index,
         scene: index + 1,
@@ -219,7 +234,7 @@ Now create a compelling, coherent ${scenesCount}-scene anime sequence that tells
       console.error('Error parsing story response:', error);
       
       // Fallback: create basic scenes with better structure
-      const scenesCount = duration;
+      const scenesCount = request.duration;
       return Array.from({ length: scenesCount }, (_, index) => {
         const progress = index / (scenesCount - 1);
         let sceneType = '';
