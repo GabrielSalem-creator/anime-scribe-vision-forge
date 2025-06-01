@@ -1,6 +1,10 @@
 
 export class VideoService {
-  async createVideoFromImages(scenes: Array<{ imageUrl: string; timestamp: number; duration?: number }>, sceneDuration: number = 1000): Promise<string> {
+  async createVideoFromImages(
+    scenes: Array<{ imageUrl: string; timestamp: number }>, 
+    totalFrames: number,
+    playbackDuration: number
+  ): Promise<string> {
     try {
       // Create a canvas element
       const canvas = document.createElement('canvas');
@@ -43,7 +47,7 @@ export class VideoService {
         mediaRecorder.start();
 
         // Animate through all scenes
-        this.animateScenes(ctx, canvas, scenes, sceneDuration).then(() => {
+        this.animateScenes(ctx, canvas, scenes, totalFrames, playbackDuration).then(() => {
           mediaRecorder.stop();
         }).catch(reject);
       });
@@ -56,15 +60,16 @@ export class VideoService {
   private async animateScenes(
     ctx: CanvasRenderingContext2D, 
     canvas: HTMLCanvasElement, 
-    scenes: Array<{ imageUrl: string; timestamp: number; duration?: number }>,
-    defaultSceneDuration: number
+    scenes: Array<{ imageUrl: string; timestamp: number }>,
+    totalFrames: number,
+    playbackDuration: number
   ): Promise<void> {
     const frameDuration = 1000 / 30; // 30 FPS
+    const framesPerScene = Math.ceil(totalFrames / scenes.length);
+    const sceneDuration = (playbackDuration * 1000) / scenes.length; // Duration per scene in ms
 
     for (let i = 0; i < scenes.length; i++) {
       const scene = scenes[i];
-      const sceneDuration = scene.duration || defaultSceneDuration;
-      const framesPerScene = sceneDuration / frameDuration;
       
       try {
         // Load the image
@@ -75,14 +80,15 @@ export class VideoService {
           img.src = scene.imageUrl;
         });
 
-        // Animate this scene for the specified duration
-        for (let frame = 0; frame < framesPerScene; frame++) {
+        // Animate this scene for the calculated duration
+        const actualFrames = Math.ceil(sceneDuration / frameDuration);
+        for (let frame = 0; frame < actualFrames; frame++) {
           // Clear canvas
           ctx.fillStyle = '#000000';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
           // Draw image with fade-in effect
-          const fadeProgress = Math.min(frame / (framesPerScene * 0.1), 1); // 10% fade-in
+          const fadeProgress = Math.min(frame / (actualFrames * 0.1), 1); // 10% fade-in
           ctx.globalAlpha = fadeProgress;
           
           // Calculate aspect ratio and draw image to fit canvas
@@ -125,7 +131,7 @@ export class VideoService {
         ctx.font = '30px Arial';
         ctx.fillText(`Error loading scene ${i + 1}`, 50, canvas.height / 2);
         
-        await new Promise(resolve => setTimeout(resolve, defaultSceneDuration));
+        await new Promise(resolve => setTimeout(resolve, sceneDuration));
       }
     }
   }

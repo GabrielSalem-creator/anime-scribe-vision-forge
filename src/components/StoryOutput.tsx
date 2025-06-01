@@ -28,7 +28,7 @@ interface StoryOutputProps {
 
 const StoryOutput: React.FC<StoryOutputProps> = ({ scenes, totalDuration }) => {
   const [isCreatingVideo, setIsCreatingVideo] = useState(false);
-  const [imagesPerSecond, setImagesPerSecond] = useState('1');
+  const [playbackDuration, setPlaybackDuration] = useState('10');
   const [videoService] = useState(new VideoService());
 
   const formatTime = (seconds: number) => {
@@ -38,6 +38,7 @@ const StoryOutput: React.FC<StoryOutputProps> = ({ scenes, totalDuration }) => {
   };
 
   const allImagesGenerated = scenes.length > 0 && scenes.every(scene => scene.imageUrl && !scene.isGenerating);
+  const totalFrames = scenes.length;
 
   const handleCreateVideo = async () => {
     if (!allImagesGenerated) {
@@ -49,16 +50,15 @@ const StoryOutput: React.FC<StoryOutputProps> = ({ scenes, totalDuration }) => {
     toast.loading('Creating animated video...', { id: 'video-creation' });
 
     try {
-      const sceneDuration = parseFloat(imagesPerSecond) * 1000; // Convert to milliseconds
+      const duration = parseFloat(playbackDuration);
       const scenesWithImages = scenes
         .filter(scene => scene.imageUrl)
         .map(scene => ({
           imageUrl: scene.imageUrl!,
-          timestamp: scene.timestamp,
-          duration: sceneDuration
+          timestamp: scene.timestamp
         }));
 
-      const videoUrl = await videoService.createVideoFromImages(scenesWithImages, sceneDuration);
+      const videoUrl = await videoService.createVideoFromImages(scenesWithImages, totalFrames, duration);
       
       toast.success('Video created successfully!', { id: 'video-creation' });
       
@@ -87,30 +87,31 @@ const StoryOutput: React.FC<StoryOutputProps> = ({ scenes, totalDuration }) => {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center space-x-4 text-slate-300">
               <div className="flex items-center space-x-1">
-                <Clock className="h-4 w-4" />
-                <span>{formatTime(totalDuration)} total</span>
+                <Camera className="h-4 w-4" />
+                <span>{totalFrames} frames</span>
               </div>
               <div className="flex items-center space-x-1">
-                <Camera className="h-4 w-4" />
+                <Clock className="h-4 w-4" />
                 <span>{scenes.length} scenes</span>
               </div>
             </div>
             
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-slate-300">Seconds per image:</span>
-                <Select value={imagesPerSecond} onValueChange={setImagesPerSecond}>
-                  <SelectTrigger className="w-20 bg-slate-800 border-purple-500/30">
+                <span className="text-sm text-slate-300">Video duration:</span>
+                <Select value={playbackDuration} onValueChange={setPlaybackDuration}>
+                  <SelectTrigger className="w-24 bg-slate-800 border-purple-500/30">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-purple-500/30">
-                    <SelectItem value="0.5">0.5s</SelectItem>
-                    <SelectItem value="1">1s</SelectItem>
-                    <SelectItem value="1.5">1.5s</SelectItem>
-                    <SelectItem value="2">2s</SelectItem>
-                    <SelectItem value="3">3s</SelectItem>
-                    <SelectItem value="4">4s</SelectItem>
                     <SelectItem value="5">5s</SelectItem>
+                    <SelectItem value="8">8s</SelectItem>
+                    <SelectItem value="10">10s</SelectItem>
+                    <SelectItem value="15">15s</SelectItem>
+                    <SelectItem value="20">20s</SelectItem>
+                    <SelectItem value="30">30s</SelectItem>
+                    <SelectItem value="45">45s</SelectItem>
+                    <SelectItem value="60">60s</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
