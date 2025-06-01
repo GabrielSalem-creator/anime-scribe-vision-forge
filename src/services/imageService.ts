@@ -1,4 +1,3 @@
-
 export class ImageService {
   private apiKeys: string[];
   private baseUrl: string;
@@ -52,33 +51,24 @@ export class ImageService {
   }
 
   async generateImagesParallel(prompts: string[]): Promise<(string | null)[]> {
-    const batchSize = this.apiKeys.length;
     const results: (string | null)[] = new Array(prompts.length).fill(null);
     
-    // Process in batches to utilize all API keys simultaneously
-    for (let i = 0; i < prompts.length; i += batchSize) {
-      const batch = prompts.slice(i, i + batchSize);
-      const batchPromises = batch.map(async (prompt, batchIndex) => {
-        try {
-          const imageUrl = await this.generateImage(prompt);
-          results[i + batchIndex] = imageUrl;
-          return { index: i + batchIndex, imageUrl };
-        } catch (error) {
-          console.error(`Error generating image for batch index ${batchIndex}:`, error);
-          results[i + batchIndex] = null;
-          return { index: i + batchIndex, imageUrl: null };
-        }
-      });
-
-      // Wait for the current batch to complete before starting the next
-      await Promise.all(batchPromises);
-      
-      // Small delay between batches to avoid overwhelming the API
-      if (i + batchSize < prompts.length) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+    // Process ALL images simultaneously using all available API keys
+    const allPromises = prompts.map(async (prompt, index) => {
+      try {
+        const imageUrl = await this.generateImage(prompt);
+        results[index] = imageUrl;
+        return { index, imageUrl };
+      } catch (error) {
+        console.error(`Error generating image for index ${index}:`, error);
+        results[index] = null;
+        return { index, imageUrl: null };
       }
-    }
+    });
 
+    // Wait for ALL images to complete simultaneously
+    await Promise.all(allPromises);
+    
     return results;
   }
 

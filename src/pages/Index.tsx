@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import StoryForm, { type StoryFormData } from '@/components/StoryForm';
 import StoryOutput, { type StoryScene } from '@/components/StoryOutput';
+import PredefinedVideos from '@/components/PredefinedVideos';
 import { AIService } from '@/services/aiService';
 import { ImageService } from '@/services/imageService';
 
@@ -21,8 +23,9 @@ const Index = () => {
   const [scenes, setScenes] = useState<StoryScene[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [totalDuration, setTotalDuration] = useState(0);
+  const [activeTab, setActiveTab] = useState('custom');
 
-  const handleGenerateStory = async (formData: StoryFormData) => {
+  const generateStoryFromData = async (formData: StoryFormData) => {
     setIsGenerating(true);
     setScenes([]);
     setTotalDuration(formData.duration);
@@ -82,6 +85,22 @@ const Index = () => {
     }
   };
 
+  const handleGenerateStory = async (formData: StoryFormData) => {
+    await generateStoryFromData(formData);
+  };
+
+  const handleGeneratePredefinedVideo = async (video: any) => {
+    const formData: StoryFormData = {
+      story: video.story,
+      duration: video.duration,
+      genre: video.genre,
+      ...video.optimizedSettings
+    };
+    
+    setActiveTab('output');
+    await generateStoryFromData(formData);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
       <div className="container mx-auto py-8 space-y-8">
@@ -94,11 +113,39 @@ const Index = () => {
           </p>
         </div>
 
-        <StoryForm onGenerateStory={handleGenerateStory} isGenerating={isGenerating} />
-        
-        {scenes.length > 0 && (
-          <StoryOutput scenes={scenes} totalDuration={totalDuration} />
-        )}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 border-purple-500/20">
+            <TabsTrigger value="custom" className="data-[state=active]:bg-purple-600/30 data-[state=active]:text-purple-300">
+              Custom Story
+            </TabsTrigger>
+            <TabsTrigger value="predefined" className="data-[state=active]:bg-purple-600/30 data-[state=active]:text-purple-300">
+              Predefined Videos
+            </TabsTrigger>
+            <TabsTrigger value="output" className="data-[state=active]:bg-purple-600/30 data-[state=active]:text-purple-300">
+              Generated Story
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="custom" className="space-y-6">
+            <StoryForm onGenerateStory={handleGenerateStory} isGenerating={isGenerating} />
+          </TabsContent>
+
+          <TabsContent value="predefined" className="space-y-6">
+            <PredefinedVideos onGenerateVideo={handleGeneratePredefinedVideo} isGenerating={isGenerating} />
+          </TabsContent>
+
+          <TabsContent value="output" className="space-y-6">
+            {scenes.length > 0 ? (
+              <StoryOutput scenes={scenes} totalDuration={totalDuration} />
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-slate-400 text-lg">
+                  No story generated yet. Create a custom story or choose a predefined video to get started.
+                </p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
